@@ -1,0 +1,1 @@
+import{_ as c,a as e,b as s,d as a,e as o,f as _}from"./index-85c8a86e.js";const d={},m={class:"min-h-screen bg-gray-50 dark:bg-gray-900"},i={class:"container mx-auto px-4 py-6"};function p(l,f){const t=e("Header"),n=e("router-view"),r=e("Footer");return s(),a("div",m,[o(t),_("main",i,[o(n)]),o(r)])}const x=c(d,[["render",p]]);export{x as default};

@@ -1,0 +1,1032 @@
+<template>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
+    <AppHeader />
+    
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+      
+      <!-- العنوان الرئيسي -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-3">
+          الملف الشخصي
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">
+          إدارة معلومات حسابك وتفضيلاتك
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- الشريط الجانبي -->
+        <div class="lg:col-span-1">
+          <!-- معلومات الحساب -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <div class="text-center">
+              <!-- الصورة الشخصية -->
+              <div class="relative inline-block mb-4">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg mx-auto">
+                  <img 
+                    v-if="user?.profileImage" 
+                    :src="user.profileImage" 
+                    :alt="user?.name"
+                    class="w-full h-full object-cover"
+                  >
+                  <div 
+                    v-else
+                    class="w-full h-full bg-gradient-to-br from-[#1B3C53] to-[#234C6A] flex items-center justify-center text-white text-2xl font-bold"
+                  >
+                    {{ user?.name?.charAt(0) || 'م' }}
+                  </div>
+                </div>
+                
+                <!-- زر تغيير الصورة -->
+                <button
+                  @click="openImageUpload"
+                  class="absolute bottom-0 right-0 w-8 h-8 bg-[#1B3C53] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#234C6A] transition-all duration-200 border-2 border-white dark:border-gray-800"
+                  title="تغيير الصورة الشخصية"
+                >
+                  <span class="material-icons text-sm">photo_camera</span>
+                </button>
+              </div>
+
+              <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-1">{{ user?.name }}</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ user?.email }}</p>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                {{ getUserRoleArabic(user?.role) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- الإحصائيات -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">إحصائياتي</h3>
+            
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span class="text-sm text-gray-600 dark:text-gray-400">المشاهدات</span>
+                <span class="font-medium text-gray-800 dark:text-white">{{ stats.totalViews || 0 }}</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span class="text-sm text-gray-600 dark:text-gray-400">الإعجابات</span>
+                <span class="font-medium text-gray-800 dark:text-white">{{ stats.totalLikes || 0 }}</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span class="text-sm text-gray-600 dark:text-gray-400">التعليقات</span>
+                <span class="font-medium text-gray-800 dark:text-white">{{ stats.totalComments || 0 }}</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span class="text-sm text-gray-600 dark:text-gray-400">التحميلات</span>
+                <span class="font-medium text-gray-800 dark:text-white">{{ stats.totalDownloads || 0 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- الإجراءات السريعة -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">الإجراءات السريعة</h3>
+            
+            <div class="space-y-2">
+              <router-link
+                to="/"
+                class="w-full flex items-center gap-3 p-3 text-right text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200"
+              >
+                <span class="material-icons text-green-500 text-lg">menu_book</span>
+                <span class="flex-1 text-sm">تصفح القصص</span>
+              </router-link>
+              
+              <button
+                @click="exportMyData"
+                class="w-full flex items-center gap-3 p-3 text-right text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200"
+              >
+                <span class="material-icons text-purple-500 text-lg">download</span>
+                <span class="flex-1 text-sm">تصدير بياناتي</span>
+              </button>
+              
+              <button
+                @click="viewActivityLog"
+                class="w-full flex items-center gap-3 p-3 text-right text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200"
+              >
+                <span class="material-icons text-orange-500 text-lg">history</span>
+                <span class="flex-1 text-sm">سجل النشاط</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="lg:col-span-2">
+          <!-- المعلومات الشخصية -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-bold text-gray-800 dark:text-white">المعلومات الشخصية</h3>
+              <button
+                @click="editMode = !editMode"
+                class="flex items-center gap-2 px-4 py-2 text-[#1B3C53] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors duration-200 text-sm font-medium"
+              >
+                <span class="material-icons text-sm">{{ editMode ? 'close' : 'edit' }}</span>
+                {{ editMode ? 'إلغاء' : 'تعديل' }}
+              </button>
+            </div>
+
+            <form v-if="editMode" @submit.prevent="updateProfile" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">الاسم الكامل</label>
+                  <input
+                    v-model="profileForm.fullName"
+                    type="text"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+                  >
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">البريد الإلكتروني</label>
+                  <input
+                    v-model="profileForm.email"
+                    type="email"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+                  >
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">رقم الهاتف</label>
+                  <input
+                    v-model="profileForm.phone"
+                    type="tel"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+                  >
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نوع المستخدم</label>
+                  <select
+                    v-model="profileForm.role"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+                  >
+                    <option value="student">طالب</option>
+                    <option value="parent">ولي أمر</option>
+                    <option value="teacher">معلم</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نبذة عني</label>
+                <textarea
+                  v-model="profileForm.bio"
+                  rows="3"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white resize-none"
+                  placeholder="اكتب نبذة مختصرة عن نفسك..."
+                ></textarea>
+              </div>
+
+              <div class="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  @click="cancelEdit"
+                  class="px-6 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 font-medium"
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  :disabled="loading"
+                  class="px-6 py-2 bg-[#1B3C53] text-white rounded-xl hover:bg-[#234C6A] transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span v-if="loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  حفظ التغييرات
+                </button>
+              </div>
+            </form>
+
+            <div v-else class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">الاسم الكامل</label>
+                  <p class="text-gray-800 dark:text-white">{{ user?.name }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">البريد الإلكتروني</label>
+                  <p class="text-gray-800 dark:text-white">{{ user?.email }}</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">رقم الهاتف</label>
+                  <p class="text-gray-800 dark:text-white">{{ user?.phone || 'غير محدد' }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">تاريخ الانضمام</label>
+                  <p class="text-gray-800 dark:text-white">{{ formatDate(user?.created_at) }}</p>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">نوع المستخدم</label>
+                <p class="text-gray-800 dark:text-white">{{ getUserRoleArabic(user?.role) }}</p>
+              </div>
+              <div v-if="user?.bio">
+                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">نبذة عني</label>
+                <p class="text-gray-800 dark:text-white leading-relaxed">{{ user.bio }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- تفضيلات المحتوى -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">تفضيلات المحتوى</h3>
+            
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div>
+                  <p class="font-medium text-gray-800 dark:text-white">الفلترة التلقائية</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">عرض المحتوى المناسب لعمرك تلقائياً</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    v-model="contentSettings.autoFilter" 
+                    class="sr-only peer"
+                    @change="saveContentSettings"
+                  >
+                  <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1B3C53]"></div>
+                </label>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">الفئة العمرية المفضلة</label>
+                <select 
+                  v-model="contentSettings.preferredAgeGroup"
+                  @change="saveContentSettings"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+                >
+                  <option value="all">جميع الأعمار</option>
+                  <option value="3-5">3-5 سنوات</option>
+                  <option value="4-6">4-6 سنوات</option>
+                  <option value="6-8">6-8 سنوات</option>
+                  <option value="8-10">8-10 سنوات</option>
+                  <option value="10-12">10-12 سنة</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">أنواع المحتوى المفضلة</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <label class="flex items-center space-x-2 space-x-reverse p-3 border border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <input 
+                      type="checkbox" 
+                      v-model="contentSettings.preferredTypes" 
+                      value="pdf" 
+                      @change="saveContentSettings"
+                      class="rounded text-[#1B3C53] focus:ring-[#1B3C53]"
+                    >
+                    <span class="text-gray-700 dark:text-gray-300 text-sm">📚 كتب PDF</span>
+                  </label>
+                  <label class="flex items-center space-x-2 space-x-reverse p-3 border border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <input 
+                      type="checkbox" 
+                      v-model="contentSettings.preferredTypes" 
+                      value="video" 
+                      @change="saveContentSettings"
+                      class="rounded text-[#1B3C53] focus:ring-[#1B3C53]"
+                    >
+                    <span class="text-gray-700 dark:text-gray-300 text-sm">🎬 فيديو</span>
+                  </label>
+                  <label class="flex items-center space-x-2 space-x-reverse p-3 border border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <input 
+                      type="checkbox" 
+                      v-model="contentSettings.preferredTypes" 
+                      value="audio" 
+                      @change="saveContentSettings"
+                      class="rounded text-[#1B3C53] focus:ring-[#1B3C53]"
+                    >
+                    <span class="text-gray-700 dark:text-gray-300 text-sm">🎵 صوت</span>
+                  </label>
+                  <label class="flex items-center space-x-2 space-x-reverse p-3 border border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <input 
+                      type="checkbox" 
+                      v-model="contentSettings.preferredTypes" 
+                      value="image" 
+                      @change="saveContentSettings"
+                      class="rounded text-[#1B3C53] focus:ring-[#1B3C53]"
+                    >
+                    <span class="text-gray-700 dark:text-gray-300 text-sm">🖼️ صور</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- التفضيلات والإعدادات -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">التفضيلات والإعدادات</h3>
+            
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div>
+                  <p class="font-medium text-gray-800 dark:text-white">الوضع الداكن</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">تفعيل الوضع الداكن تلقائياً</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    v-model="preferences.darkMode" 
+                    class="sr-only peer"
+                    @change="savePreferences"
+                  >
+                  <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1B3C53]"></div>
+                </label>
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div>
+                  <p class="font-medium text-gray-800 dark:text-white">الإشعارات البريدية</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">استلام إشعارات على البريد الإلكتروني</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    v-model="preferences.emailNotifications" 
+                    class="sr-only peer"
+                    @change="savePreferences"
+                  >
+                  <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1B3C53]"></div>
+                </label>
+              </div>
+
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div>
+                  <p class="font-medium text-gray-800 dark:text-white">الإشعارات التطبيقية</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">عرض إشعارات داخل التطبيق</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    v-model="preferences.pushNotifications" 
+                    class="sr-only peer"
+                    @change="savePreferences"
+                  >
+                  <div class="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#1B3C53]"></div>
+                </label>
+              </div>
+
+              <!-- تغيير كلمة المرور -->
+              <div class="pt-4 border-t border-gray-200 dark:border-gray-600">
+                <button
+                  @click="openSecuritySettings"
+                  class="w-full flex items-center justify-between p-4 text-right text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors duration-200"
+                >
+                  <span class="flex items-center gap-3">
+                    <span class="material-icons text-red-500 text-lg">lock</span>
+                    <span class="text-sm font-medium">تغيير كلمة المرور</span>
+                  </span>
+                  <span class="material-icons text-gray-400 text-sm">chevron_left</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- نافذة تحميل الصورة -->
+    <div v-if="showImageUpload" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white">تغيير الصورة الشخصية</h3>
+          <button 
+            @click="showImageUpload = false"
+            class="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- معاينة الصورة -->
+          <div class="text-center">
+            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 dark:border-gray-600 mx-auto mb-4">
+              <img 
+                v-if="imagePreview" 
+                :src="imagePreview" 
+                alt="معاينة الصورة"
+                class="w-full h-full object-cover"
+              >
+              <div 
+                v-else
+                class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400"
+              >
+                <span class="material-icons text-3xl">photo_camera</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- تحميل الصورة -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">اختر صورة</label>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              @change="handleImageSelect"
+              class="hidden"
+            >
+            <button
+              type="button"
+              @click="$refs.fileInput.click()"
+              class="w-full px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-[#1B3C53] dark:hover:border-blue-400 transition-colors duration-200 text-gray-600 dark:text-gray-400"
+            >
+              <span class="flex items-center justify-center gap-2">
+                <span class="material-icons">cloud_upload</span>
+                اختر صورة من الجهاز
+              </span>
+            </button>
+          </div>
+
+          <!-- معلومات الصورة -->
+          <div v-if="selectedImage" class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              <span class="font-medium">الحجم:</span> {{ (selectedImage.size / 1024 / 1024).toFixed(2) }} MB
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <span class="font-medium">النوع:</span> {{ selectedImage.type }}
+            </p>
+          </div>
+
+          <!-- أزرار التحكم -->
+          <div class="flex items-center gap-3 pt-4">
+            <button
+              @click="showImageUpload = false"
+              class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              إلغاء
+            </button>
+            <button
+              @click="uploadProfileImage"
+              :disabled="!selectedImage || uploadingImage"
+              class="flex-1 px-4 py-2 bg-[#1B3C53] text-white rounded-xl hover:bg-[#234C6A] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <span v-if="uploadingImage" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              حفظ الصورة
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- نافذة تغيير كلمة المرور -->
+    <div v-if="showSecuritySettings" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold text-gray-800 dark:text-white">تغيير كلمة المرور</h3>
+          <button 
+            @click="showSecuritySettings = false"
+            class="p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <form @submit.prevent="changePassword" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">كلمة المرور الحالية</label>
+            <div class="relative">
+              <input
+                v-model="passwordForm.currentPassword"
+                :type="showCurrentPassword ? 'text' : 'password'"
+                class="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              >
+              <button
+                type="button"
+                @click="showCurrentPassword = !showCurrentPassword"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <span class="material-icons text-sm">
+                  {{ showCurrentPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">كلمة المرور الجديدة</label>
+            <div class="relative">
+              <input
+                v-model="passwordForm.newPassword"
+                :type="showNewPassword ? 'text' : 'password'"
+                class="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              >
+              <button
+                type="button"
+                @click="showNewPassword = !showNewPassword"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <span class="material-icons text-sm">
+                  {{ showNewPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">تأكيد كلمة المرور</label>
+            <div class="relative">
+              <input
+                v-model="passwordForm.confirmPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                class="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#1B3C53] focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              >
+              <button
+                type="button"
+                @click="showConfirmPassword = !showConfirmPassword"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <span class="material-icons text-sm">
+                  {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- مؤشر قوة كلمة المرور -->
+          <div v-if="passwordForm.newPassword" class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">قوة كلمة المرور:</label>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-300"
+                :class="passwordStrength.class"
+                :style="{ width: passwordStrength.percentage + '%' }"
+              ></div>
+            </div>
+            <p class="text-xs mt-1" :class="passwordStrength.textColor">
+              {{ passwordStrength.text }}
+            </p>
+          </div>
+
+          <!-- أزرار التحكم -->
+          <div class="flex items-center gap-3 pt-4">
+            <button
+              type="button"
+              @click="showSecuritySettings = false"
+              class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              :disabled="loading"
+              class="flex-1 px-4 py-2 bg-[#1B3C53] text-white rounded-xl hover:bg-[#234C6A] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <span v-if="loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              تغيير كلمة المرور
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import StatisticsManager from '@/utils/statisticsManager'
+
+export default {
+  name: 'UserProfile',
+  setup() {
+    const router = useRouter()
+    const user = ref(null)
+    const editMode = ref(false)
+    const loading = ref(false)
+    const uploadingImage = ref(false)
+    const showImageUpload = ref(false)
+    const showSecuritySettings = ref(false)
+    const selectedImage = ref(null)
+    const imagePreview = ref(null)
+    
+    const showCurrentPassword = ref(false)
+    const showNewPassword = ref(false)
+    const showConfirmPassword = ref(false)
+
+    const profileForm = ref({
+      fullName: '',
+      email: '',
+      phone: '',
+      role: 'student',
+      bio: ''
+    })
+
+    const passwordForm = ref({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    })
+
+    const preferences = ref({
+      darkMode: false,
+      emailNotifications: true,
+      pushNotifications: true
+    })
+
+    const contentSettings = ref({
+      autoFilter: true,
+      preferredAgeGroup: 'all',
+      preferredTypes: ['pdf', 'video', 'audio']
+    })
+
+    // نظام التحديث اللحظي
+    const setupRealTimeUpdates = () => {
+      window.addEventListener('interactionsUpdated', loadUserStats)
+    }
+
+    // تحميل البيانات
+    const loadData = () => {
+      console.log('🔄 [المستفيد] جاري تحميل بيانات المستخدم...')
+      const userData = localStorage.getItem('userData')
+      if (userData) {
+        user.value = JSON.parse(userData)
+        profileForm.value = {
+          fullName: user.value.name || '',
+          email: user.value.email || '',
+          phone: user.value.phone || '',
+          role: user.value.role || 'student',
+          bio: user.value.bio || ''
+        }
+      }
+
+      // تحميل التفضيلات
+      const savedPreferences = localStorage.getItem('userPreferences')
+      if (savedPreferences) {
+        preferences.value = { ...preferences.value, ...JSON.parse(savedPreferences) }
+      }
+
+      // تحميل إعدادات المحتوى
+      const savedContentSettings = localStorage.getItem('userContentSettings')
+      if (savedContentSettings) {
+        contentSettings.value = { ...contentSettings.value, ...JSON.parse(savedContentSettings) }
+      }
+
+      // تحميل الإحصائيات
+      loadUserStats()
+    }
+
+    // تحميل إحصائيات المستخدم
+    const loadUserStats = () => {
+      if (!user.value?.id) return
+      
+      try {
+        const userStats = StatisticsManager.getUserStatistics(user.value.id)
+        console.log('📊 [المستفيد] إحصائيات المستخدم:', userStats)
+      } catch (error) {
+        console.error('❌ [المستفيد] خطأ في تحميل الإحصائيات:', error)
+      }
+    }
+
+    // الإحصائيات المحدثة
+    const stats = computed(() => {
+      if (!user.value?.id) {
+        return {
+          totalViews: 0,
+          totalLikes: 0,
+          totalComments: 0,
+          totalDownloads: 0
+        }
+      }
+
+      try {
+        const userStats = StatisticsManager.getUserStatistics(user.value.id)
+        return {
+          totalViews: userStats.totalViews || 0,
+          totalLikes: userStats.totalLikes || 0,
+          totalComments: userStats.totalComments || 0,
+          totalDownloads: userStats.totalDownloads || 0
+        }
+      } catch (error) {
+        console.error('❌ [المستفيد] خطأ في حساب الإحصائيات:', error)
+        return {
+          totalViews: 0,
+          totalLikes: 0,
+          totalComments: 0,
+          totalDownloads: 0
+        }
+      }
+    })
+
+    // قوة كلمة المرور
+    const passwordStrength = computed(() => {
+      const password = passwordForm.value.newPassword
+      if (!password) return { percentage: 0, text: '', class: '', textColor: '' }
+
+      let strength = 0
+      let text = ''
+      let colorClass = ''
+      let textColor = ''
+
+      // التحقق من طول كلمة المرور
+      if (password.length >= 8) strength += 25
+      if (password.length >= 12) strength += 25
+
+      // التحقق من التعقيد
+      if (/[A-Z]/.test(password)) strength += 25
+      if (/[0-9]/.test(password)) strength += 15
+      if (/[^A-Za-z0-9]/.test(password)) strength += 10
+
+      // تحديد النص واللون
+      if (strength < 50) {
+        text = 'ضعيفة'
+        colorClass = 'bg-red-500'
+        textColor = 'text-red-500'
+      } else if (strength < 75) {
+        text = 'متوسطة'
+        colorClass = 'bg-yellow-500'
+        textColor = 'text-yellow-500'
+      } else {
+        text = 'قوية'
+        colorClass = 'bg-green-500'
+        textColor = 'text-green-500'
+      }
+
+      return {
+        percentage: Math.min(strength, 100),
+        text: text,
+        class: colorClass,
+        textColor: textColor
+      }
+    })
+
+    // فتح نافذة تحميل الصورة
+    const openImageUpload = () => {
+      showImageUpload.value = true
+      selectedImage.value = null
+      imagePreview.value = null
+    }
+
+    // فتح نافذة الأمان
+    const openSecuritySettings = () => {
+      showSecuritySettings.value = true
+      passwordForm.value = {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }
+    }
+
+    // اختيار الصورة
+    const handleImageSelect = (event) => {
+      const file = event.target.files[0]
+      if (file) {
+        // التحقق من نوع الملف
+        if (!file.type.startsWith('image/')) {
+          alert('❌ يرجى اختيار ملف صورة فقط')
+          return
+        }
+
+        // التحقق من حجم الملف (5MB كحد أقصى)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('❌ حجم الصورة يجب أن يكون أقل من 5MB')
+          return
+        }
+
+        selectedImage.value = file
+        
+        // إنشاء معاينة للصورة
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          imagePreview.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    // رفع الصورة الشخصية
+    const uploadProfileImage = async () => {
+      if (!selectedImage.value) return
+
+      uploadingImage.value = true
+      
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        
+        // في تطبيق حقيقي، هنا يتم رفع الصورة للخادم
+        // حالياً سنحفظها في localStorage كـ base64
+        user.value.profileImage = imagePreview.value
+        localStorage.setItem('userData', JSON.stringify(user.value))
+        
+        showImageUpload.value = false
+        showNotification('✅ تم تحديث الصورة الشخصية بنجاح', 'success')
+        
+      } catch (error) {
+        showNotification('❌ حدث خطأ أثناء رفع الصورة', 'error')
+      } finally {
+        uploadingImage.value = false
+      }
+    }
+
+    // تحديث الملف الشخصي
+    const updateProfile = async () => {
+      loading.value = true
+      
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // تحديث بيانات المستخدم
+        user.value.name = profileForm.value.fullName
+        user.value.email = profileForm.value.email
+        user.value.phone = profileForm.value.phone
+        user.value.role = profileForm.value.role
+        user.value.bio = profileForm.value.bio
+        
+        // حفظ التغييرات
+        localStorage.setItem('userData', JSON.stringify(user.value))
+        
+        editMode.value = false
+        showNotification('✅ تم تحديث الملف الشخصي بنجاح', 'success')
+        
+      } catch (error) {
+        showNotification('❌ حدث خطأ أثناء تحديث الملف الشخصي', 'error')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // تغيير كلمة المرور
+    const changePassword = async () => {
+      if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+        showNotification('❌ كلمة المرور الجديدة غير متطابقة', 'error')
+        return
+      }
+
+      if (passwordForm.value.newPassword.length < 6) {
+        showNotification('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error')
+        return
+      }
+
+      loading.value = true
+      
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // في تطبيق حقيقي، هنا يتم التحقق من كلمة المرور الحالية وتغييرها
+        showNotification('✅ تم تغيير كلمة المرور بنجاح', 'success')
+        showSecuritySettings.value = false
+        passwordForm.value = {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        }
+        
+      } catch (error) {
+        showNotification('❌ حدث خطأ أثناء تغيير كلمة المرور', 'error')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // حفظ التفضيلات
+    const savePreferences = () => {
+      localStorage.setItem('userPreferences', JSON.stringify(preferences.value))
+      
+      // تطبيق الوضع الداكن إذا تم تغييره
+      if (preferences.value.darkMode) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      
+      showNotification('✅ تم حفظ التفضيلات', 'success')
+    }
+
+    // حفظ إعدادات المحتوى
+    const saveContentSettings = () => {
+      localStorage.setItem('userContentSettings', JSON.stringify(contentSettings.value))
+      showNotification('✅ تم حفظ تفضيلات المحتوى', 'success')
+    }
+
+    // إلغاء التعديل
+    const cancelEdit = () => {
+      editMode.value = false
+      loadData() // إعادة تحميل البيانات الأصلية
+    }
+
+    // دوال مساعدة
+    const getUserRoleArabic = (role) => {
+      const roles = {
+        'student': 'طالب',
+        'parent': 'ولي أمر',
+        'teacher': 'معلم',
+        'admin': 'مدير',
+        'employee': 'موظف'
+      }
+      return roles[role] || 'مستفيد'
+    }
+
+    const formatDate = (dateString) => {
+      if (!dateString) return 'غير محدد'
+      return new Date(dateString).toLocaleDateString('ar-EG')
+    }
+
+    const showNotification = (message, type = 'info') => {
+      // في التطبيق الحقيقي، استخدم مكتبة إشعارات أو مكون مخصص
+      alert(message)
+    }
+
+    // دوال الإجراءات السريعة
+    const exportMyData = () => {
+      try {
+        if (!user.value?.id) {
+          showNotification('❌ لا توجد بيانات مستخدم', 'error')
+          return
+        }
+
+        const userStats = StatisticsManager.getUserStatistics(user.value.id)
+        const userInteractions = StatisticsManager.getUserInteractions(user.value.id)
+        
+        const data = {
+          user: user.value,
+          stats: userStats,
+          interactions: userInteractions,
+          preferences: preferences.value,
+          contentSettings: contentSettings.value,
+          exportDate: new Date().toISOString()
+        }
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `my-profile-data-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        
+        showNotification('✅ تم تصدير بياناتك بنجاح', 'success')
+      } catch (error) {
+        console.error('❌ [المستفيد] خطأ في تصدير البيانات:', error)
+        showNotification('❌ حدث خطأ أثناء تصدير البيانات', 'error')
+      }
+    }
+
+    const viewActivityLog = () => {
+      // في التطبيق الحقيقي، يمكن توجيه المستخدم إلى صفحة سجل النشاط
+      showNotification('سيتم فتح سجل النشاط قريباً', 'info')
+    }
+
+    onMounted(() => {
+      console.log('🚀 [المستفيد] تم تحميل الملف الشخصي')
+      loadData()
+      setupRealTimeUpdates()
+    })
+
+    // تنظيف event listener
+    onUnmounted(() => {
+      console.log('🧹 [المستفيد] تنظيف المكون')
+      window.removeEventListener('interactionsUpdated', loadUserStats)
+    })
+
+    return {
+      user,
+      editMode,
+      loading,
+      uploadingImage,
+      showImageUpload,
+      showSecuritySettings,
+      selectedImage,
+      imagePreview,
+      showCurrentPassword,
+      showNewPassword,
+      showConfirmPassword,
+      profileForm,
+      passwordForm,
+      preferences,
+      contentSettings,
+      stats,
+      passwordStrength,
+      openImageUpload,
+      openSecuritySettings,
+      handleImageSelect,
+      uploadProfileImage,
+      updateProfile,
+      changePassword,
+      savePreferences,
+      saveContentSettings,
+      cancelEdit,
+      getUserRoleArabic,
+      formatDate,
+      exportMyData,
+      viewActivityLog
+    }
+  }
+}
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+</style>

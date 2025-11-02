@@ -1,0 +1,129 @@
+/* متغيرات CSS الديناميكية */
+:root {
+  --primary-color: #01352c;
+  --secondary-color: #02513f;
+  /* Use the imported Reem Kufi as the primary UI font for better Arabic rendering */
+  --font-family: 'The Year of Handicrafts', 'Tajawal', 'Reem Kufi', 'Tahoma', 'Arial', sans-serif;
+  /* height used by the sticky header to push content down */
+  --header-height: 96px;
+  --base-font-size: 17px;
+}
+
+/* تطبيق المتغيرات */
+body {
+  font-family: var(--font-family);
+  font-size: var(--base-font-size);
+  line-height: 1.78; /* improve readability for Arabic text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  color: #0f172a;
+  background-color: #fbfdfb;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* الوضع الداكن */
+.dark-mode {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.dark-mode .bg-white {
+  background-color: #2d2d2d !important;
+}
+
+.dark-mode .text-gray-800 {
+  color: #e5e5e5 !important;
+}
+
+.dark-mode .border-gray-200 {
+  border-color: #404040 !important;
+}
+
+.dark-mode .text-gray-600 {
+  color: #a0a0a0 !important;
+}
+
+.dark-mode .bg-gray-50 {
+  background-color: #2d2d2d !important;
+}
+
+/* Prevent header (sticky) from overlapping page content: push the next sibling down */
+#app > main { padding-top: calc(var(--header-height) + 12px); }
+
+/* Default container padding for better breathing room */
+.container { padding-left: 1rem; padding-right: 1rem; }
+
+/* Slightly soften heavy header shadow so it doesn't feel blocky */
+header { box-shadow: 0 6px 12px rgba(2,6,23,0.08); }
+
+/* Headings spacing for better vertical rhythm */
+h1, h2, h3 { line-height: 1.25; }
+
+/* Reduce very large font weights for better reading */
+h1 { font-weight: 700; font-size: 1.6rem; }
+h2 { font-weight: 600; }
+
+/* Improve wrapping for Arabic and long words to avoid overlap */
+html, body, p, span, li, a, button, label, input, textarea {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Provide standard fallbacks for line-clamp utility used across views */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Normalize native form control appearance for cross-browser consistency */
+input, select, textarea, button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Make images and media responsive */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Constrain content containers on very narrow screens */
+.container {
+  max-width: 1200px;
+}
+
+/* Ensure dropdowns and cards have readable text spacing */
+.rounded-lg, .card, .notification-item, .message-item {
+  word-break: normal;
+}
+
+/* Small-screen improvements: allow header's internal items to wrap */
+@media (max-width: 768px) {
+  header + * { margin-top: calc(var(--header-height) + 8px); }
+}

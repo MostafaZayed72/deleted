@@ -1,0 +1,31 @@
+<!-- Previous content remains the same until the saveDraft function -->
+
+    const saveDraft = async () => {
+      try {
+        // تنظيف وتجهيز البيانات للحفظ
+        const storyData = { ...form.value }
+        
+        // تنظيف كائنات الملفات
+        if (storyData.cover_image?.file) {
+          delete storyData.cover_image.file
+        }
+        if (storyData.story_file?.file) {
+          delete storyData.story_file.file
+        }
+        
+        // إضافة وقت الحفظ
+        storyData.draft_saved_at = new Date().toISOString()
+        storyData.status = 'draft'
+        
+        // حفظ في التخزين المحلي
+        localStorage.setItem('story_draft', JSON.stringify(storyData))
+        
+        // تأكيد الحفظ للمستخدم
+        alert('تم حفظ المسودة بنجاح')
+      } catch (error) {
+        console.error('Error saving draft:', error)
+        alert('حدث خطأ في حفظ المسودة')
+      }
+    }
+
+<!-- Rest of the code remains the same -->
